@@ -45,3 +45,30 @@ func NewByTaskBuilder(builder types.TaskBuilder, opts ...types.TaskOption) (*typ
 
 	return task, nil
 }
+
+func NewFinalWorkflow(builder types.WorkflowBuilder, opts ...types.TaskOption) (*types.Workflow, error) {
+	task, err := NewByTaskBuilder(builder, opts...)
+	if err != nil {
+		return nil, err
+	}
+	task.CallbackName = ""
+
+	finalTask, err := NewByTaskBuilder(builder, opts...)
+	if err != nil {
+		return nil, err
+	}
+	finalSteps, err := builder.FinalSteps()
+	if err != nil {
+		return nil, err
+	}
+	finalTask.Steps = finalSteps
+
+	task.CommonParams["finalTaskID"] = finalTask.TaskID
+	finalTask.CommonParams["parrentTaskID"] = task.TaskID
+	task.CallbackName = ""
+
+	return &types.Workflow{
+		Task:      task,
+		FinalTask: finalTask,
+	}, nil
+}

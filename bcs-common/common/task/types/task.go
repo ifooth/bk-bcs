@@ -28,6 +28,12 @@ type TaskBuilder interface { // nolint
 	FinalizeTask(t *Task) error // FinalizeTask for custom task
 }
 
+// WorkflowBuilder ...
+type WorkflowBuilder interface {
+	TaskBuilder
+	FinalSteps() ([]*Step, error) // FinalSteps for custom task
+}
+
 // TaskOptions xxx
 type TaskOptions struct {
 	CallbackName        string

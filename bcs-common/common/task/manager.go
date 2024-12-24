@@ -247,6 +247,29 @@ func (m *TaskManager) Dispatch(task *types.Task) error {
 	return m.dispatchAt(task, "")
 }
 
+// DispatchWorkflow dispatch task
+func (m *TaskManager) DispatchWorkflow(wf *types.Workflow) error {
+	if err := wf.Task.Validate(); err != nil {
+		return err
+	}
+
+	if err := GetGlobalStorage().CreateTask(context.Background(), wf.Task); err != nil {
+		return err
+	}
+
+	if wf.FinalTask != nil {
+		if err := wf.FinalTask.Validate(); err != nil {
+			return err
+		}
+
+		if err := GetGlobalStorage().CreateTask(context.Background(), wf.FinalTask); err != nil {
+			return err
+		}
+	}
+
+	return m.dispatchAt(wf.Task, "")
+}
+
 func (m *TaskManager) transTaskToSignature(task *types.Task, stepNameBegin string) []*tasks.Signature {
 	var signatures []*tasks.Signature
 
